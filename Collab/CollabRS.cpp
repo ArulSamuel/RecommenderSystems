@@ -1,9 +1,8 @@
-
-
-#include "CollabRS.h"
+#include "NearestNeighbor.h"
 #include <iostream>
-#include <string.h>
+#include <string>
 #include <fstream>
+#include <vector>
 
 //Constructor
 CollabRS::CollabRS(string dataFileName)
@@ -32,29 +31,37 @@ void CollabRS::readDataFile()
 	{	
 		if(userId!=oldUserId)
 		{
-			songMap->clear();
+			userMap->insert(std::make_pair(oldUserId,songMap));
+			songMap=new InnerMap();
 		}
-		songMap[songId]=playCount;
-		userMap[userId]=songMap;
+		
+		songMap->insert(std::make_pair(songId,playCount));
 		oldUserId=userId;
 		if(!(datafile >> userId >> songId >> playCount))
 		{	
 			eof=1;
 		}
 	}
-	cout<<"The length of the Map is "<<userMap->size();
-	
+	//cout<<"\n The length of the user Map is "<<userMap->size();		
 }
 
 int main(int argc, char *argv[])
 {
-	string dataFileName = "tasteData.txt";	
+	//Hard-coded Datafile name
+	string dataFileName = "train_triplets_reduced.txt";	
 	CollabRS *collabRS=new CollabRS(dataFileName);
 	collabRS->readDataFile();
 
-	desiredUserId="";
+	//Hard-coded user for whom prediction is required
+	string desiredUserId="15c15cedf3e678239877daa22b45cb8d5e9ed9df";
 	NearestNeighbor *nearestNeighbor=new NearestNeighbor();
-	nearestNeighbor->findPredictions(desiredUserId);
-
-		
+	vector<string> *predictions=nearestNeighbor->findPredictions(desiredUserId,collabRS);
+	
+	//Displaying the predictions
+	//cout<<"\n \n The predicted songs for "<<desiredUserId<<" are ";
+	//for(std::vector<string>::iterator itsongs=predictions->begin();itsongs !=predictions->end();itsongs++)
+	//{
+	//	string song=itsongs[0];
+	//	cout<<song;
+	//}
 }
